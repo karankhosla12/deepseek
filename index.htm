@@ -1,1 +1,116 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepseek</title>
+    <script type="module">
+        import { HfInference } from "https://cdn.jsdelivr.net/npm/@huggingface/inference/+esm";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const client = new HfInference("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");
+            const form = document.getElementById("chat-form");
+            const input = document.getElementById("user-input");
+            const chatBox = document.getElementById("chat-box");
+
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const userMessage = input.value.trim();
+                if (!userMessage) return;
+
+                chatBox.innerHTML += `<div class='user-message'>You: ${userMessage}</div>`;
+                input.value = "";
+                
+                try {
+                    const response = await client.chatCompletion({
+                        model: "deepseek-ai/DeepSeek-R1",
+                        messages: [{ role: "user", content: userMessage }],
+                        provider: "together",
+                        max_tokens: 500
+                    });
+                    
+                    const botReply = response.choices[0].message.content;
+                    chatBox.innerHTML += `<div class='bot-message'>Deepseek: ${botReply}</div>`;
+                } catch (error) {
+                    chatBox.innerHTML += `<div class='error-message'>Error: Unable to get a response.</div>`;
+                    console.error(error);
+                }
+                
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        #chat-container {
+            width: 50%;
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fff;
+            border-radius: 5px;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+            margin: 5px 0;
+        }
+        .bot-message {
+            text-align: left;
+            color: green;
+            margin: 5px 0;
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+        }
+        #chat-form {
+            display: flex;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            margin-left: 5px;
+            border: none;
+            background: blue;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h2>Deepseek Chatbot</h2>
+        <div id="chat-box"></div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message here..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</body>
+</html>
